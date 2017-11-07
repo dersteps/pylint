@@ -12,8 +12,6 @@ def execute(soup):
         "config":config_map
     }
 
-    print config_map
-
     if soup is None:
         return ret_map
 
