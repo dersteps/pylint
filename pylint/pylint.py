@@ -41,7 +41,8 @@ and they lived at the bottom of a well.</p>
 
         logger.debug("Loaded plugin '%s'" % plugin_name)
         # TODO: useful config :)
-        plugin.configure({"html_file": "index.html"})
+        #plugin.configure({"html_file": "index.html"})
+        plugin.config_map = {'html_file':'index.html'}
 
         result = plugin.execute(soup)
 

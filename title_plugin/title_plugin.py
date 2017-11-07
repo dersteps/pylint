@@ -1,9 +1,5 @@
 config_map = {}
 
-def configure(cfg_map={}):
-    global config_map
-    config_map = cfg_map
-
 def execute(soup):
     ret_map = {
         "info": [],
