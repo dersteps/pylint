@@ -2,6 +2,7 @@ import os
 from os.path import expanduser
 from os import path, makedirs
 import logging
+import sys
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -90,7 +91,6 @@ def i(text):
     print "[%s*%s] %s" % (bcolors.CYAN, bcolors.ENDC, text)
 
 def w(text):
-    if args.disable_warnings is True: return
     print "[%s!%s] %s" % (bcolors.YELLOW, bcolors.ENDC, text)
 
 def e(text):

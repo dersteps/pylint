@@ -4,12 +4,37 @@ from util import *
 from os import path
 import logging
 from pprint import pprint
+import argparse
 from bs4 import BeautifulSoup
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-def main():
+
+class PyLint:
+    def __init__(self, soup, plugin_source, cli_args):
+        self.args = cli_args
+        self.soup = soup
+        self.plugin_source = plugin_source
+
+    def run(self):
+        for plugin_name in self.plugin_source.list_plugins():
+            plugin = self.plugin_source.load_plugin(plugin_name)
+
+            logger.debug("Loaded plugin '%s'" % plugin_name)
+            plugin.config_map = {'html_file': 'index.html'}
+
+            result = plugin.execute(self.soup)
+
+            for info in result["info"]:
+                s("[%s] %s" % (result["config"]["html_file"], info))
+            for warning in result["warn"]:
+                w("[%s] %s" % (result["config"]["html_file"], warning))
+            for error in result["error"]:
+                e("[%s] %s" % (result["config"]["html_file"], error))
+
+
+def main(args):
     pylint_home = get_pylint_home()
     plugins_dir = get_plugins_directory()
 
@@ -22,7 +47,7 @@ def main():
 
     # Taken from BS4 documentation
     html_doc = """
-<html><head><title>The Dormouse's story</title></head>
+<html><head></head>
 <body>
 <p class="title"><b>The Dormouse's story</b></p>
 
@@ -36,25 +61,15 @@ and they lived at the bottom of a well.</p>
 """
     soup = BeautifulSoup(html_doc, 'html.parser')
 
-    for plugin_name in plugin_source.list_plugins():
-        plugin = plugin_source.load_plugin(plugin_name)
-
-        logger.debug("Loaded plugin '%s'" % plugin_name)
-        # TODO: useful config :)
-        #plugin.configure({"html_file": "index.html"})
-        plugin.config_map = {'html_file':'index.html'}
-
-        result = plugin.execute(soup)
-
-        for info in result["info"]:
-            s("[%s] %s" % (result["config"]["html_file"], info))
-        for warning in result["warn"]:
-            w("[%s] %s" % (result["config"]["html_file"], warning))
-        for error in result["error"]:
-            e("[%s] %s" % (result["config"]["html_file"], error))
-
-
+    pylint = PyLint(soup, plugin_source, args)
+    pylint.run()
 
 
 if __name__ == '__main__':
-    main()
+
+    parser = argparse.ArgumentParser(description="PyLint - Plugin-based HTML linter")
+    parser.add_argument("-f", "--file", dest="file", required=False, help="Path to the file to lint")
+    parser.add_argument("-d", "--dir", dest="directory", required=False, help="Path to the directory to parse for files to lint")
+    parser.add_argument("-u", "--url", dest="url", required=False, help="URL to the file to lint (will be downloaded, then parsed)")
+    args = parser.parse_args()
+    main(args)
